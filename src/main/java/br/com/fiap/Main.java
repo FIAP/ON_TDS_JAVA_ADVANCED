@@ -8,31 +8,87 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
-        Game game1 = new Game();
-        game1.setId(4L);
-        game1.setTitulo("Batletoads");
-        game1.setCategoria("Luta");
-        //game1.setDataLancamento(LocalDate.of(1992, 8, 1));
-        game1.setDataLancamento(LocalDate.of(1992, 6, 1));
-        game1.setFinalizado(true);
-        //game1.setProdutora("Tradewest");
-        game1.setProdutora("Tradewest, Rare");
-        game1.setValor(99.89);
 
         EntityManager em = Conexao.getEntityManager();
-        GameDao gameDao = new GameDao(em);
 
-        em.getTransaction().begin();
-        //gameDao.salvar(game1);
-        //gameDao.atualizar(game1);
-        gameDao.remover(game1);
-        em.getTransaction().commit();
+        //cadastrar(em);
+        //pesquisar(em);
+        //listarTodosOsGames(em);
+        //buscarGamePeloNome(em);
+        buscarGamesPorFaixaDeValores(em);
+
         em.close();
 
     }
+
+    public static void buscarGamesPorFaixaDeValores(EntityManager em) {
+        GameDao gameDao = new GameDao(em);
+        List<Game> games = gameDao.buscarGamesPorFaixaDeValores(150.0, 300.0);
+
+        for (Game game : games) {
+            System.out.println(game);
+            System.out.println("------------------------");
+        }
+    }
+
+    public static void buscarGamePeloNome(EntityManager em) {
+        GameDao gameDao = new GameDao(em);
+        List<Game> games = gameDao.buscarGamePeloNome("mega man 2".toUpperCase());
+
+        for (Game game : games) {
+            System.out.println(game);
+            System.out.println("------------------------");
+        }
+    }
+
+
+    public static void listarTodosOsGames(EntityManager em) {
+        GameDao gameDao = new GameDao(em);
+        List<Game> games = gameDao.listarTodosOsGames();
+
+        for (Game game : games) {
+            System.out.println(game);
+            System.out.println("------------------------");
+        }
+    }
+
+
+    public static void pesquisar(EntityManager em) {
+
+        GameDao gameDao = new GameDao(em);
+        Game game = new Game();
+        game.setId(20L);
+        Game gameEncontrado = gameDao.buscarGamePeloId(game);
+
+        if (gameEncontrado != null) {
+            System.out.println(gameEncontrado.toString());
+        } else {
+            System.out.println("Game não encontrado!");
+        }
+
+    }
+
+    public static void cadastrar(EntityManager em) {
+        Game game1 = new Game();
+        game1.setTitulo("Ikari Warriors");
+        game1.setCategoria("Arcade");
+        game1.setDataLancamento(LocalDate.of(1986, 1, 1));
+        game1.setFinalizado(true);
+        game1.setProdutora("SNK");
+        game1.setValor(256.88);
+
+        GameDao gameDao = new GameDao(em);
+
+        em.getTransaction().begin();
+        gameDao.salvar(game1);
+        game1.setTitulo("Ikari Warriors SNK");
+        em.getTransaction().commit();
+    }
+
 
 }
