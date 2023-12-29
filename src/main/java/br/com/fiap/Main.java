@@ -1,6 +1,8 @@
 package br.com.fiap;
 
+import br.com.fiap.dao.CategoriaDao;
 import br.com.fiap.dao.GameDao;
+import br.com.fiap.model.Categoria;
 import br.com.fiap.model.Game;
 import br.com.fiap.utils.Conexao;
 import jakarta.persistence.EntityManager;
@@ -18,10 +20,19 @@ public class Main {
         //pesquisar(em);
         //listarTodosOsGames(em);
         //buscarGamePeloNome(em);
-        buscarGamesPorFaixaDeValores(em);
+        //buscarGamesPorFaixaDeValores(em);
+        buscarCategoriaPeloId(em);
 
         em.close();
 
+    }
+
+    public static void buscarCategoriaPeloId(EntityManager em) {
+        CategoriaDao gameDao = new CategoriaDao(em);
+        Categoria categoria = new Categoria();
+        categoria.setId(1L);
+        Categoria categoriaEncontrada = gameDao.buscarCategoriaPeloId(categoria);
+        System.out.println(categoriaEncontrada.toString());
     }
 
     public static void buscarGamesPorFaixaDeValores(EntityManager em) {
@@ -36,14 +47,13 @@ public class Main {
 
     public static void buscarGamePeloNome(EntityManager em) {
         GameDao gameDao = new GameDao(em);
-        List<Game> games = gameDao.buscarGamePeloNome("mega man 2".toUpperCase());
+        List<Game> games = gameDao.buscarGamePeloNome("Street Fighter II");
 
         for (Game game : games) {
             System.out.println(game);
             System.out.println("------------------------");
         }
     }
-
 
     public static void listarTodosOsGames(EntityManager em) {
         GameDao gameDao = new GameDao(em);
@@ -55,12 +65,11 @@ public class Main {
         }
     }
 
-
     public static void pesquisar(EntityManager em) {
 
         GameDao gameDao = new GameDao(em);
         Game game = new Game();
-        game.setId(20L);
+        game.setId(7L);
         Game gameEncontrado = gameDao.buscarGamePeloId(game);
 
         if (gameEncontrado != null) {
@@ -72,21 +81,45 @@ public class Main {
     }
 
     public static void cadastrar(EntityManager em) {
-        Game game1 = new Game();
-        game1.setTitulo("Ikari Warriors");
-        game1.setCategoria("Arcade");
-        game1.setDataLancamento(LocalDate.of(1986, 1, 1));
-        game1.setFinalizado(true);
-        game1.setProdutora("SNK");
-        game1.setValor(256.88);
 
+        // Criamos uma categoria
+        Categoria luta = new Categoria();
+        //luta.setNomeCategoria("LUTA");
+        luta.setId(1L);
+
+        // Criamos uma instância de CategoriaDao
+        CategoriaDao categoriaDao = new CategoriaDao(em);
+
+        // Iniciamos uma transação de dados no banco
+        em.getTransaction().begin();
+
+        // Chamamos o método salvar de CategoriaDao
+        // para persistir uma categoria no banco
+        //categoriaDao.salvar(luta);
+
+        // Criamos um game da categoria luta
+        Game game1 = new Game();
+        game1.setTitulo("Streets of rage");
+        game1.setCategoria(luta);
+        game1.setDataLancamento(LocalDate.of(1991, 7, 1));
+        game1.setFinalizado(true);
+        game1.setProdutora("Sega");
+        game1.setValor(99.99);
+
+        // Criação de uma instância de GameDao
         GameDao gameDao = new GameDao(em);
 
-        em.getTransaction().begin();
+        // Chamamos o método salvar de GameDao
+        // para persistir um game no banco
         gameDao.salvar(game1);
-        game1.setTitulo("Ikari Warriors SNK");
-        em.getTransaction().commit();
-    }
 
+        // Efetuamos o commit para sincronizar
+        // no banco de dados todas as alterações
+        em.getTransaction().commit();
+
+        // Fechamos a EntityManager
+        em.close();
+
+    }
 
 }
